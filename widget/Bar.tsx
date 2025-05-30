@@ -135,6 +135,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     </box>
   }
 
+  function ResultBox(): JSX.Element {
+    return <box className="result-box">
+      <scrollable hexpand={true} vexpand={true}>
+        <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable></label>
+      </scrollable>
+    </box>
+  }
+
   // ---------- to refactor ----------
 
   return <window
@@ -163,12 +171,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     <box className="vertical-box" vertical widthRequest={monitor_width * 0.5}>
       <PromptBox />
       <box className="gap"></box>
-      <box className="result-box">
-        <scrollable hexpand={true} vexpand={true}>
-          <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable></label>
-        </scrollable>
-      </box>
+      <ResultBox />
     </box>
   </window>
 }
-        // <centerbox className="text" setup={self => mode.subscribe(val => {print('skrr'); val == Mode.Translate ? self.show() : self.hide();})}>
