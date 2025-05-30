@@ -21,6 +21,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   let callback_handle = null
 
   let result_counter = 0
+  let number_of_pending_asyncs = 0
 
   return <window
   className="Spotlight"
@@ -37,9 +38,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       callback_handle = setTimeout(() => {
         let text_to_translate = prompt_text.get()
         let result_id = ++result_counter;
+        number_of_pending_asyncs++
         execAsync(['trans', 'en:cs', text_to_translate])
           .then((out) => {
-            if(result_id < result_counter)
+            number_of_pending_asyncs--
+            let should_quit = result_id < result_counter
+            if(number_of_pending_asyncs == 0) // reset result counter
+              result_counter = 0
+            if(should_quit)
               return
             let out_formatted = out.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') // remove ansi escape characters
             results_content.set(out_formatted)
