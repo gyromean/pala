@@ -80,7 +80,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       </box>
       <box className="gap"></box>
       <box className="result-box">
-        <label className="output" label={results_content()} xalign={0} yalign={0}></label>
+        <scrollable hexpand={true} vexpand={true}>
+          <label className="output" label={results_content()} xalign={0} yalign={0} wrap selectable></label>
+        </scrollable>
       </box>
     </box>
   </window>
