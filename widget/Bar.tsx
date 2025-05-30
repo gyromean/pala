@@ -1,5 +1,6 @@
 import { App, Astal, Gtk, Gdk } from "astal/gtk3"
 import { Variable } from "astal"
+import { execAsync } from "astal/process"
 
 const padding = 10
 
@@ -15,6 +16,12 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   const prompt_text = Variable("")
   const mode_label = Variable("󰗊")
 
+  const results_content = Variable("Placeholder")
+
+  let callback_handle = null
+
+  let result_counter = 0
+
   return <window
   className="Spotlight"
   gdkmonitor={gdkmonitor}
@@ -23,6 +30,28 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   // css="background: green;"
   // keymode={Astal.Keymode.EXCLUSIVE}
   onKeyPressEvent={function (self, event: Gdk.Event) {
+    // ---------- trans ----------
+    if(callback_handle)
+      clearTimeout(callback_handle)
+    if(prompt_text.get()) {
+      callback_handle = setTimeout(() => {
+        let text_to_translate = prompt_text.get()
+        let result_id = ++result_counter;
+        execAsync(['trans', 'en:cs', text_to_translate])
+          .then((out) => {
+            if(result_id < result_counter)
+              return
+            let out_formatted = out.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') // remove ansi escape characters
+            results_content.set(out_formatted)
+          })
+          .catch((err) => printerr(err))
+      }, 100)
+    }
+    else {
+      result_counter++
+      results_content.set("")
+    }
+    // ---------- exit ----------
     if(event.get_keyval()[1] === Gdk.KEY_Escape)
       App.quit()
   }}
@@ -44,7 +73,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         ></entry>
       </box>
       <box className="gap"></box>
-      <box className="result-box"></box>
+      <box className="result-box">
+        <label className="output" label={results_content()} xalign={0} yalign={0}></label>
+      </box>
     </box>
   </window>
 }
