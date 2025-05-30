@@ -5,6 +5,9 @@ $bg-color: #1F1F28;
 $border-color: #ffffffaa;
 $secondary-color: #2C2C3A;
 
+$icon-font-size: 20;
+$font-size: 16;
+
 $prompt-height: 50px;
 
 $padding: 10px;
@@ -13,19 +16,15 @@ $radius: 10px;
 window.Spotlight {
   // background: transparent;
   // font-weight: bold;
-  font-size: 20;
+  font-size: $font-size;
   color: $fg-color;
-  // color: $secondary-color;
 
   box.vertical-box {
     border: 2px solid $border-color;
-    // border-radius: $radius;
     border-radius: 20px; // nebo $radius?
     padding: $padding;
     background: $bg-color;
     >box {
-      // padding: $padding;
-      // background: $bg-color;
     }
     box.gap {
       min-height: 2px;
@@ -37,9 +36,17 @@ window.Spotlight {
   // --- PROMPT ---
   box.prompt-box {
     centerbox.mode {
+      font-size: $icon-font-size;
       background-color: $secondary-color;
-      // background-color: $fg-color;
       min-width: $prompt-height;
+      border-radius: $radius;
+    }
+    centerbox.text {
+      background-color: $secondary-color;
+      // padding-left: $padding;
+      // padding-right: $padding;
+      padding-left: calc(1.5 * $padding);
+      padding-right: calc(1.5 * $padding);
       border-radius: $radius;
     }
     min-height: $prompt-height;

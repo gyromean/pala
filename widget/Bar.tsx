@@ -33,6 +33,9 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         <centerbox className="mode">
           <label label={mode_label()}></label>
         </centerbox>
+        <centerbox className="text">
+          <label label="en  cs"></label>
+        </centerbox>
         <entry
         placeholderText="Search"
         enableEmojiCompletion={true}
