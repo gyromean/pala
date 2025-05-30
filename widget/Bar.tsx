@@ -17,8 +17,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
   const input_text = Variable("")
   const output_text = Variable("Placeholder ".repeat(1000))
-  // const mode = Variable(Mode.App)
-  const mode = Variable(Mode.Translate)
+  const mode = Variable(Mode.Qalc)
   const langs = Variable(["en", "cs"])
 
   let callback_handle = null
@@ -52,9 +51,24 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     return ['trans', `${lang_from}:${lang_to}`, input_text_val]
   }
 
-  let make_exec_args = make_args_translate
+  const make_args_qalc = () => {
+    let input_text_val = input_text.get()
+    return ['qalc', input_text_val]
+  }
 
-  const enqueue_exec = (make_args) => {
+  const enqueue_exec = () => {
+    let make_args
+    switch(mode.get()) {
+      case Mode.App:
+        make_args = make_args_translate // TODO:
+        break
+      case Mode.Translate:
+        make_args = make_args_translate
+        break
+      case Mode.Qalc:
+        make_args = make_args_qalc
+        break
+    }
     if(callback_handle)
       clearTimeout(callback_handle)
     if(input_text.get()) { // prompt text is not empty
@@ -94,7 +108,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     switch(event.get_keyval()[1]) {
       case Gdk.KEY_Tab:
         swap_langs()
-        enqueue_exec(make_exec_args)
+        enqueue_exec()
         return true
         break
       case Gdk.KEY_Escape:
@@ -123,7 +137,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         onChanged={self => {
           print('changed')
           input_text.set(self.text)
-          enqueue_exec(make_exec_args)
+          enqueue_exec()
         }}
         ></entry>
       </box>
