@@ -89,7 +89,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           })}></label>
         </centerbox>
         <entry
-        placeholderText="Search"
+        // placeholderText="Search"
+        hexpand={true}
         enableEmojiCompletion={true}
         text={prompt_text()}
         onChanged={self => {

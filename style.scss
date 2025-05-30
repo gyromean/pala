@@ -53,6 +53,7 @@ window.Spotlight {
   }
   // --- RESULT ---
   box.result-box {
+    // padding-top: $padding;
     // border-top: 2px solid $secondary-color;
     min-height: 600px;
   }
@@ -60,4 +61,19 @@ window.Spotlight {
 
 scrollable>viewport {
   border: none;
+}
+
+entry {
+  transition: none;
+  border-radius: $radius;
+  border: none;
+  box-shadow: none;
+  background: $secondary-color;
+  color: $fg-color;
+}
+
+entry:focus {
+  // border: 2px solid $border-color;
+  border: none;
+  box-shadow: none;
 }
