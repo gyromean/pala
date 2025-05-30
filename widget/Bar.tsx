@@ -4,36 +4,66 @@ import { execAsync } from "astal/process"
 
 const padding = 10
 
+enum Mode {
+  App,
+  Translate,
+  Qalc,
+}
+
 export default function Bar(gdkmonitor: Gdk.Monitor) {
-  const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
+  const monitor_width = gdkmonitor.get_geometry().width
 
-  const monitor_geometry = gdkmonitor.get_geometry()
-  const monitor_height = monitor_geometry.height
-  const monitor_width = monitor_geometry.width
+  // ---------- refactored ----------
 
-  const prompt_text = Variable("")
-  const mode_label = Variable("󰗊")
-
+  const input_text = Variable("")
+  const output_text = Variable("Placeholder ".repeat(1000))
+  // const mode = Variable(Mode.App)
+  const mode = Variable(Mode.Translate)
   const langs = Variable(["en", "cs"])
 
-  // const results_content = Variable("Placeholder")
-  const results_content = Variable("Placeholder ".repeat(1000))
-
   let callback_handle = null
-
   let result_counter = 0
   let number_of_pending_asyncs = 0
 
-  const make_trans = () => {
+  const get_mode_icon = () => {
+    return bind(mode).as(mode_val => {
+      switch(mode_val) {
+        case Mode.App:
+          // return '󱡁'
+          return ''
+        case Mode.Translate:
+          return '󰗊'
+        case Mode.Qalc:
+          return ''
+          return '󰪚'
+          return ''
+      }
+    })
+  }
+
+  const swap_langs = () => {
+    const [lang_from, lang_to] = langs.get()
+    langs.set([lang_to, lang_from])
+  }
+
+  const make_args_translate = () => {
+    let input_text_val = input_text.get()
+    const [lang_from, lang_to] = langs.get()
+    return ['trans', `${lang_from}:${lang_to}`, input_text_val]
+  }
+
+  let make_exec_args = make_args_translate
+
+  const enqueue_exec = (make_args) => {
     if(callback_handle)
       clearTimeout(callback_handle)
-    if(prompt_text.get()) { // prompt text is not empty
+    if(input_text.get()) { // prompt text is not empty
       callback_handle = setTimeout(() => {
-        let text_to_translate = prompt_text.get()
         let result_id = ++result_counter;
         number_of_pending_asyncs++
-        const [lang_from, lang_to] = langs.get()
-        execAsync(['trans', `${lang_from}:${lang_to}`, text_to_translate])
+
+        execAsync(make_args())
+
           .then((out) => {
             number_of_pending_asyncs--
             let should_quit = result_id < result_counter
@@ -42,21 +72,18 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
             if(should_quit)
               return
             let out_formatted = out.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') // remove ansi escape characters
-            results_content.set(out_formatted)
+            output_text.set(out_formatted)
           })
           .catch((err) => printerr(err))
-      }, 100)
+      }, 300)
     }
     else { // prompt text is empty
       result_counter++
-      results_content.set("")
+      output_text.set("")
     }
   }
 
-  const swap_langs = () => {
-    const [lang_from, lang_to] = langs.get()
-    langs.set([lang_to, lang_from])
-  }
+  // ---------- to refactor ----------
 
   return <window
   className="Spotlight"
@@ -67,7 +94,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     switch(event.get_keyval()[1]) {
       case Gdk.KEY_Tab:
         swap_langs()
-        make_trans()
+        enqueue_exec(make_exec_args)
         return true
         break
       case Gdk.KEY_Escape:
@@ -80,7 +107,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     <box className="vertical-box" vertical widthRequest={monitor_width * 0.5}>
       <box className="prompt-box" spacing={padding}>
         <centerbox className="mode">
-          <label label={mode_label()}></label>
+          <label label={get_mode_icon()}></label>
         </centerbox>
         <centerbox className="text">
           <label label={bind(langs).as(([lang_from, lang_to]) => {
@@ -92,18 +119,18 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         // placeholderText="Search"
         hexpand={true}
         enableEmojiCompletion={true}
-        text={prompt_text()}
+        text={input_text()}
         onChanged={self => {
           print('changed')
-          prompt_text.set(self.text)
-          make_trans()
+          input_text.set(self.text)
+          enqueue_exec(make_exec_args)
         }}
         ></entry>
       </box>
       <box className="gap"></box>
       <box className="result-box">
         <scrollable hexpand={true} vexpand={true}>
-          <label className="output" label={results_content()} xalign={0} yalign={0} wrap selectable></label>
+          <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable></label>
         </scrollable>
       </box>
     </box>
