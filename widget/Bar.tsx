@@ -97,6 +97,44 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     }
   }
 
+  const show_when = target_mode => {
+    return s => {
+      mode.subscribe(current_mode => {
+        if(current_mode == target_mode)
+          s.show()
+        else
+          s.hide()
+      })
+    }
+  }
+
+  function PromptBox(): JSX.Element {
+    return <box className="prompt-box" spacing={padding}>
+      <centerbox className="mode">
+        <label label={get_mode_icon()}></label>
+      </centerbox>
+
+      <centerbox className="text" setup={show_when(Mode.Translate)}>
+        <label label={bind(langs).as(([lang_from, lang_to]) => {
+          print('zmena')
+          return `${lang_from}  ${lang_to}`
+        })}></label>
+      </centerbox>
+
+      <entry
+      // placeholderText="Search"
+      hexpand={true}
+      enableEmojiCompletion={true}
+      text={input_text()}
+      onChanged={self => {
+        print('changed')
+        input_text.set(self.text)
+        enqueue_exec()
+      }}
+      ></entry>
+    </box>
+  }
+
   // ---------- to refactor ----------
 
   return <window
@@ -123,30 +161,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   keymode={Astal.Keymode.ON_DEMAND}
   application={App}>
     <box className="vertical-box" vertical widthRequest={monitor_width * 0.5}>
-      <box className="prompt-box" spacing={padding}>
-        <centerbox className="mode">
-          <label label={get_mode_icon()}></label>
-        </centerbox>
-
-        <centerbox className="text" setup={self => mode.subscribe(val => {print('skrr'); val == Mode.Translate ? self.show() : self.hide();})}>
-          <label label={bind(langs).as(([lang_from, lang_to]) => {
-            print('zmena')
-            return `${lang_from}  ${lang_to}`
-          })}></label>
-        </centerbox>
-
-        <entry
-        // placeholderText="Search"
-        hexpand={true}
-        enableEmojiCompletion={true}
-        text={input_text()}
-        onChanged={self => {
-          print('changed')
-          input_text.set(self.text)
-          enqueue_exec()
-        }}
-        ></entry>
-      </box>
+      <PromptBox />
       <box className="gap"></box>
       <box className="result-box">
         <scrollable hexpand={true} vexpand={true}>
@@ -156,3 +171,4 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     </box>
   </window>
 }
+        // <centerbox className="text" setup={self => mode.subscribe(val => {print('skrr'); val == Mode.Translate ? self.show() : self.hide();})}>
