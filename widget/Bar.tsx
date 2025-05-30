@@ -96,31 +96,31 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   const show_when = target_mode => {
-    const f = s => {
+    const f = self => {
       if(mode.get() == target_mode)
-        s.show()
+        self.show()
       else
-        s.hide()
+        self.hide()
     }
-    return s => {
-      f(s)
+    return self => {
+      f(self)
       mode.subscribe(_ => {
-        f(s)
+        f(self)
       })
     }
   }
 
   const hide_when = target_mode => {
-    const f = s => {
+    const f = self => {
       if(mode.get() == target_mode)
-        s.hide()
+        self.hide()
       else
-        s.show()
+        self.show()
     }
-    return s => {
-      f(s)
+    return self => {
+      f(self)
       mode.subscribe(_ => {
-        f(s)
+        f(self)
       })
     }
   }
@@ -146,7 +146,10 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       onChanged={self => {
         print('changed')
         input_text.set(self.text)
-        enqueue_exec()
+        // TODO: dodelat management kdyz je to v Mode.App
+        if(mode.get() != Mode.App) {
+          enqueue_exec()
+        }
       }}
       ></entry>
     </box>
@@ -160,13 +163,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     </box>
   }
 
-  // ---------- to refactor ----------
-
-  return <window
-  className="Spotlight"
-  gdkmonitor={gdkmonitor}
-  exclusivity={Astal.Exclusivity.IGNORE}
-  onKeyPressEvent={function (self, event: Gdk.Event) {
+  const key_press_event = (self, event: Gdk.Event) => {
     const key = event.get_keyval()[1]
     // switch to another mode
     if(mode.get() == Mode.App && input_text.get() === "") {
@@ -196,7 +193,15 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         App.quit()
         break
     }
-  }}
+  }
+
+  // ---------- to refactor ----------
+
+  return <window
+  className="Spotlight"
+  gdkmonitor={gdkmonitor}
+  exclusivity={Astal.Exclusivity.IGNORE}
+  onKeyPressEvent={key_press_event}
   keymode={Astal.Keymode.ON_DEMAND}
   application={App}>
     <box className="vertical-box" vertical widthRequest={monitor_width * 0.5}>
