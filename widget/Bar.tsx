@@ -1,10 +1,8 @@
 import { App, Astal, Gtk, Gdk } from "astal/gtk3"
-import { Variable } from "astal"
+import { bind, Variable } from "astal"
 import { execAsync } from "astal/process"
 
 const padding = 10
-
-// const time = Variable("").poll(1000, "date")
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const { TOP, LEFT, RIGHT } = Astal.WindowAnchor
@@ -67,9 +65,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   className="Spotlight"
   gdkmonitor={gdkmonitor}
   exclusivity={Astal.Exclusivity.IGNORE}
-  // anchor={TOP}
-  // css="background: green;"
-  // keymode={Astal.Keymode.EXCLUSIVE}
   onKeyPressEvent={function (self, event: Gdk.Event) {
     print('keypress')
     switch(event.get_keyval()[1]) {
@@ -116,20 +111,3 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     </box>
   </window>
 }
-/*
-  <centerbox>
-<button
-onClicked="echo hello"
-halign={Gtk.Align.CENTER}
->
-Welcome to AGS!
-</button>
-<box />
-<button
-onClicked={() => print("hello")}
-halign={Gtk.Align.CENTER}
->
-<label label={time()} />
-</button>
-</centerbox>
-*/
