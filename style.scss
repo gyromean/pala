@@ -1,0 +1,52 @@
+// https://gitlab.gnome.org/GNOME/gtk/-/blob/gtk-3-24/gtk/theme/Adwaita/_colors-public.scss
+// $fg-color: #fefae0;
+$fg-color: #e5e2d0;
+$bg-color: #1F1F28;
+$border-color: #ffffffaa;
+$secondary-color: #2C2C3A;
+
+$prompt-height: 50px;
+
+$padding: 10px;
+$radius: 10px;
+
+window.Spotlight {
+  // background: transparent;
+  // font-weight: bold;
+  font-size: 20;
+  color: $fg-color;
+  // color: $secondary-color;
+
+  box.vertical-box {
+    border: 2px solid $border-color;
+    // border-radius: $radius;
+    border-radius: 20px; // nebo $radius?
+    padding: $padding;
+    background: $bg-color;
+    >box {
+      // padding: $padding;
+      // background: $bg-color;
+    }
+    box.gap {
+      min-height: 2px;
+      background-color: $secondary-color;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+  }
+  // --- PROMPT ---
+  box.prompt-box {
+    centerbox.mode {
+      background-color: $secondary-color;
+      // background-color: $fg-color;
+      min-width: $prompt-height;
+      border-radius: $radius;
+    }
+    min-height: $prompt-height;
+  }
+  // --- RESULT ---
+  box.result-box {
+    // border-top: 2px solid $secondary-color;
+    min-height: 600px;
+  }
+}
