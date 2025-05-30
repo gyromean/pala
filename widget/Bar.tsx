@@ -107,8 +107,12 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     print('keypress')
     switch(event.get_keyval()[1]) {
       case Gdk.KEY_Tab:
-        swap_langs()
-        enqueue_exec()
+        if(mode.get() == Mode.Translate)
+          mode.set(Mode.Qalc)
+        else
+          mode.set(Mode.Translate)
+        // swap_langs()
+        // enqueue_exec()
         return true
         break
       case Gdk.KEY_Escape:
@@ -123,12 +127,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         <centerbox className="mode">
           <label label={get_mode_icon()}></label>
         </centerbox>
-        <centerbox className="text">
+
+        <centerbox className="text" setup={self => mode.subscribe(val => {print('skrr'); val == Mode.Translate ? self.show() : self.hide();})}>
           <label label={bind(langs).as(([lang_from, lang_to]) => {
             print('zmena')
             return `${lang_from}  ${lang_to}`
           })}></label>
         </centerbox>
+
         <entry
         // placeholderText="Search"
         hexpand={true}
