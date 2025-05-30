@@ -31,32 +31,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   // css="background: green;"
   // keymode={Astal.Keymode.EXCLUSIVE}
   onKeyPressEvent={function (self, event: Gdk.Event) {
-    // ---------- trans ----------
-    if(callback_handle)
-      clearTimeout(callback_handle)
-    if(prompt_text.get()) {
-      callback_handle = setTimeout(() => {
-        let text_to_translate = prompt_text.get()
-        let result_id = ++result_counter;
-        number_of_pending_asyncs++
-        execAsync(['trans', 'en:cs', text_to_translate])
-          .then((out) => {
-            number_of_pending_asyncs--
-            let should_quit = result_id < result_counter
-            if(number_of_pending_asyncs == 0) // reset result counter
-              result_counter = 0
-            if(should_quit)
-              return
-            let out_formatted = out.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') // remove ansi escape characters
-            results_content.set(out_formatted)
-          })
-          .catch((err) => printerr(err))
-      }, 100)
-    }
-    else {
-      result_counter++
-      results_content.set("")
-    }
     // ---------- exit ----------
     if(event.get_keyval()[1] === Gdk.KEY_Escape)
       App.quit()
@@ -75,7 +49,35 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         placeholderText="Search"
         enableEmojiCompletion={true}
         text={prompt_text()}
-        onChanged={self => prompt_text.set(self.text)}
+        onChanged={self => {
+          prompt_text.set(self.text)
+          // ---------- trans ----------
+          if(callback_handle)
+            clearTimeout(callback_handle)
+          if(prompt_text.get()) {
+            callback_handle = setTimeout(() => {
+              let text_to_translate = prompt_text.get()
+              let result_id = ++result_counter;
+              number_of_pending_asyncs++
+              execAsync(['trans', 'en:cs', text_to_translate])
+                .then((out) => {
+                  number_of_pending_asyncs--
+                  let should_quit = result_id < result_counter
+                  if(number_of_pending_asyncs == 0) // reset result counter
+                    result_counter = 0
+                  if(should_quit)
+                    return
+                  let out_formatted = out.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '') // remove ansi escape characters
+                  results_content.set(out_formatted)
+                })
+                .catch((err) => printerr(err))
+            }, 100)
+          }
+          else {
+            result_counter++
+            results_content.set("")
+          }
+        }}
         ></entry>
       </box>
       <box className="gap"></box>
