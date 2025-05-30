@@ -13,11 +13,9 @@ enum Mode {
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const monitor_width = gdkmonitor.get_geometry().width
 
-  // ---------- refactored ----------
-
   const input_text = Variable("")
   const output_text = Variable("Placeholder ".repeat(1000))
-  const mode = Variable(Mode.Qalc)
+  const mode = Variable(Mode.App)
   const langs = Variable(["en", "cs"])
 
   let callback_handle = null
@@ -98,12 +96,31 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   const show_when = target_mode => {
+    const f = s => {
+      if(mode.get() == target_mode)
+        s.show()
+      else
+        s.hide()
+    }
     return s => {
-      mode.subscribe(current_mode => {
-        if(current_mode == target_mode)
-          s.show()
-        else
-          s.hide()
+      f(s)
+      mode.subscribe(_ => {
+        f(s)
+      })
+    }
+  }
+
+  const hide_when = target_mode => {
+    const f = s => {
+      if(mode.get() == target_mode)
+        s.hide()
+      else
+        s.show()
+    }
+    return s => {
+      f(s)
+      mode.subscribe(_ => {
+        f(s)
       })
     }
   }
@@ -150,15 +167,29 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   gdkmonitor={gdkmonitor}
   exclusivity={Astal.Exclusivity.IGNORE}
   onKeyPressEvent={function (self, event: Gdk.Event) {
-    print('keypress')
-    switch(event.get_keyval()[1]) {
-      case Gdk.KEY_Tab:
-        if(mode.get() == Mode.Translate)
-          mode.set(Mode.Qalc)
-        else
+    const key = event.get_keyval()[1]
+    // switch to another mode
+    if(mode.get() == Mode.App && input_text.get() === "") {
+      switch(key) {
+        case Gdk.KEY_slash:
           mode.set(Mode.Translate)
-        // swap_langs()
-        // enqueue_exec()
+          return true
+        case Gdk.KEY_equal:
+          mode.set(Mode.Qalc)
+          return true
+      }
+    }
+    // capture specific keys
+    switch(key) {
+      case Gdk.KEY_Tab:
+        // if(mode.get() == Mode.Translate)
+        //   mode.set(Mode.Qalc)
+        // else
+        //   mode.set(Mode.Translate)
+        if(mode.get() == Mode.Translate) {
+          swap_langs()
+          enqueue_exec()
+        }
         return true
         break
       case Gdk.KEY_Escape:
