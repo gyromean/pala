@@ -27,13 +27,11 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   const make_trans = () => {
     if(callback_handle)
       clearTimeout(callback_handle)
-    // prompt text is not empty
-    if(prompt_text.get()) {
+    if(prompt_text.get()) { // prompt text is not empty
       callback_handle = setTimeout(() => {
         let text_to_translate = prompt_text.get()
         let result_id = ++result_counter;
         number_of_pending_asyncs++
-        // execAsync(['trans', 'en:cs', text_to_translate])
         const [lang_from, lang_to] = langs.get()
         execAsync(['trans', `${lang_from}:${lang_to}`, text_to_translate])
           .then((out) => {
@@ -49,8 +47,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           .catch((err) => printerr(err))
       }, 100)
     }
-    // prompt text is empty
-    else {
+    else { // prompt text is empty
       result_counter++
       results_content.set("")
     }
