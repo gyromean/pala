@@ -23,7 +23,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   let number_of_pending_asyncs = 0
 
   const get_mode_icon = () => {
-    return bind(mode).as(mode_val => {
+    return mode(mode_val => {
       switch(mode_val) {
         case Mode.App:
           // return '󱡁'
@@ -32,8 +32,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           return '󰗊'
         case Mode.Qalc:
           return ''
-          return '󰪚'
-          return ''
+          // return '󰪚'
+          // return ''
       }
     })
   }
@@ -132,7 +132,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       </centerbox>
 
       <centerbox className="text" setup={show_when(Mode.Translate)}>
-        <label label={bind(langs).as(([lang_from, lang_to]) => {
+        <label label={langs(([lang_from, lang_to]) => {
           print('zmena')
           return `${lang_from}  ${lang_to}`
         })}></label>
