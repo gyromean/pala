@@ -14,13 +14,15 @@ enum Mode {
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const monitor_width = gdkmonitor.get_geometry().width
   const apps = new Apps.Apps()
+  const window_name = "spotlight-" + gdkmonitor.get_geometry().x
 
   const input_text = Variable("")
   const output_text = Variable("")
   const mode = Variable(Mode.App)
   const langs = Variable(["en", "cs"])
-  const app_list = input_text(text => mode.get() == Mode.App ? apps.fuzzy_query(text) : [])
   const app_index = Variable(0)
+
+  const app_list = input_text(text => mode.get() == Mode.App ? apps.fuzzy_query(text) : [])
   const app_compound = Variable.derive([app_list, app_index], (a, b) => [a, b])
 
   app_list.subscribe(_ => app_index.set(0)) // reset index each time we update listed apps
@@ -28,6 +30,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   let callback_handle = null
   let result_counter = 0
   let number_of_pending_asyncs = 0
+
+  const reset = () => {
+    mode.set(Mode.App) // must be above input_text, otherwise app entries won't get rendered once the launcher is reopened
+    input_text.set("")
+    output_text.set("")
+    langs.set(["en", "cs"])
+    app_index.set(0)
+  }
 
   const get_mode_icon = () => {
     return mode(mode_val => {
@@ -45,10 +55,11 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     })
   }
 
-  const done = () => {
+  const finish = () => {
     // App.quit()
     // setTimeout(() => App.quit(), 100) // TODO: workaround, remove when we switch to hiding the app and not completely closing it
-    App.get_window("spotlight").hide()
+    App.get_window(window_name).hide()
+    reset()
   }
 
   const swap_langs = () => {
@@ -151,7 +162,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     if(mode.get() !== Mode.App)
       return
     app_list.get()[app_index.get()].launch()
-    done()
+    finish()
   }
 
   function AppEntry({ app, index }: { app: Apps.Application, index: Number }): JSX.Element {
@@ -245,7 +256,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         launch_app()
         break
       case Gdk.KEY_Escape:
-        done()
+        finish()
         break
       default:
         terminate_propagation = false
@@ -255,12 +266,13 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   return <window
-  name="spotlight"
+  name={window_name}
   className="spotlight"
   gdkmonitor={gdkmonitor}
   exclusivity={Astal.Exclusivity.IGNORE}
   onKeyPressEvent={key_press_event}
   keymode={Astal.Keymode.ON_DEMAND}
+  visible={false}
   application={App}>
     <box className="vertical-box" vertical widthRequest={monitor_width * 0.5}>
       <PromptBox />
