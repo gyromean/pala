@@ -45,6 +45,11 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     })
   }
 
+  const done = () => {
+    // App.quit()
+    setTimeout(() => App.quit(), 100) // TODO: workaround, remove when we switch to hiding the app and not completely closing it
+  }
+
   const swap_langs = () => {
     const [lang_from, lang_to] = langs.get()
     langs.set([lang_to, lang_from])
@@ -133,6 +138,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   const shift_app_index = delta => {
+    if(mode.get() !== Mode.App)
+      return
     const index = app_index.get()
     if(delta < 0 && index > 0) {
       app_index.set(index - 1)
@@ -140,7 +147,13 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     else if(delta > 0 && index < app_list.get().length - 1) {
       app_index.set(index + 1)
     }
-    print(app_index.get())
+  }
+
+  const launch_app = () => {
+    if(mode.get() !== Mode.App)
+      return
+    app_list.get()[app_index.get()].launch()
+    done()
   }
 
   function AppEntry({ app, index }: { app: Apps.Application, index: Number }): JSX.Element {
@@ -218,6 +231,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           return true
       }
     }
+    let terminate_propagation = true
     // capture specific keys
     switch(key) {
       case Gdk.KEY_Tab:
@@ -229,20 +243,24 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           swap_langs()
           enqueue_exec()
         }
-        return true
         break
       case Gdk.KEY_Down:
         shift_app_index(1)
-        return true
         break
       case Gdk.KEY_Up:
         shift_app_index(-1)
-        return true
+        break
+      case Gdk.KEY_Return:
+        launch_app()
         break
       case Gdk.KEY_Escape:
-        App.quit()
+        done()
+        break
+      default:
+        terminate_propagation = false
         break
     }
+    return terminate_propagation
   }
 
   return <window
