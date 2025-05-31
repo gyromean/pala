@@ -70,12 +70,12 @@ export default function Launcher(gdkmonitor: Gdk.Monitor) {
   const make_args_translate = () => {
     let input_text_val = input_text.get()
     const [lang_from, lang_to] = langs.get()
-    return ['trans', `${lang_from}:${lang_to}`, input_text_val]
+    return ['trans', `${lang_from}:${lang_to}`, '--', input_text_val]
   }
 
   const make_args_qalc = () => {
     let input_text_val = input_text.get()
-    return ['qalc', input_text_val]
+    return ['qalc', '--', input_text_val]
   }
 
   const enqueue_exec = () => {
