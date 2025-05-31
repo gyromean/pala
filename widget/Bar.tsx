@@ -16,7 +16,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   const apps = new Apps.Apps()
 
   const input_text = Variable("")
-  const output_text = Variable("Placeholder ".repeat(1000))
+  const output_text = Variable("")
   const mode = Variable(Mode.App)
   const langs = Variable(["en", "cs"])
   const app_list = input_text(text => mode.get() == Mode.App ? apps.fuzzy_query(text) : [])
@@ -47,7 +47,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
 
   const done = () => {
     // App.quit()
-    setTimeout(() => App.quit(), 100) // TODO: workaround, remove when we switch to hiding the app and not completely closing it
+    // setTimeout(() => App.quit(), 100) // TODO: workaround, remove when we switch to hiding the app and not completely closing it
+    App.get_window("spotlight").hide()
   }
 
   const swap_langs = () => {
@@ -69,9 +70,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   const enqueue_exec = () => {
     let make_args
     switch(mode.get()) {
-      case Mode.App:
-        make_args = make_args_translate // TODO:
-        break
       case Mode.Translate:
         make_args = make_args_translate
         break
@@ -159,8 +157,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   function AppEntry({ app, index }: { app: Apps.Application, index: Number }): JSX.Element {
     const children = []
     children.push(<label label={app.name}></label>)
-    // if(app.description)
-    //   children.push(<label label={`(${app.description})`} />)
     let class_name = "app-entry"
     if(index == app_index.get())
       class_name += " selected"
@@ -191,7 +187,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       <entry
       // placeholderText="Search"
       hexpand={true}
-      enableEmojiCompletion={true}
       text={input_text()}
       onChanged={self => {
         print('changed')
@@ -235,10 +230,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     // capture specific keys
     switch(key) {
       case Gdk.KEY_Tab:
-        // if(mode.get() == Mode.Translate)
-        //   mode.set(Mode.Qalc)
-        // else
-        //   mode.set(Mode.Translate)
         if(mode.get() == Mode.Translate) {
           swap_langs()
           enqueue_exec()
@@ -264,7 +255,8 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   }
 
   return <window
-  className="Spotlight"
+  name="spotlight"
+  className="spotlight"
   gdkmonitor={gdkmonitor}
   exclusivity={Astal.Exclusivity.IGNORE}
   onKeyPressEvent={key_press_event}
