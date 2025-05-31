@@ -1,6 +1,6 @@
 import { App } from "astal/gtk3"
 import style from "./style.scss"
-import Bar from "./widget/Bar"
+import Launcher from "./widget/Launcher"
 import Hyprland from "gi://AstalHyprland"
 
 const hyprland = Hyprland.get_default()
@@ -23,7 +23,7 @@ const id_to_name = make_id_to_name()
 App.start({
   css: style,
   main() {
-    App.get_monitors().map(Bar)
+    App.get_monitors().map(Launcher)
   },
   requestHandler(request, res) {
     if(request == "show") {

@@ -11,7 +11,7 @@ enum Mode {
   Qalc,
 }
 
-export default function Bar(gdkmonitor: Gdk.Monitor) {
+export default function Launcher(gdkmonitor: Gdk.Monitor) {
   const monitor_width = gdkmonitor.get_geometry().width
   const apps = new Apps.Apps()
   const window_name = "spotlight-" + gdkmonitor.get_geometry().x
