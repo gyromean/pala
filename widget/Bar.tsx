@@ -1,6 +1,7 @@
 import { App, Astal, Gtk, Gdk } from "astal/gtk3"
 import { bind, Variable } from "astal"
 import { execAsync } from "astal/process"
+import Apps from "gi://AstalApps"
 
 const padding = 10
 
@@ -12,11 +13,13 @@ enum Mode {
 
 export default function Bar(gdkmonitor: Gdk.Monitor) {
   const monitor_width = gdkmonitor.get_geometry().width
+  const apps = new Apps.Apps()
 
   const input_text = Variable("")
   const output_text = Variable("Placeholder ".repeat(1000))
   const mode = Variable(Mode.App)
   const langs = Variable(["en", "cs"])
+  const app_list = input_text(text => mode.get() == Mode.App ? apps.fuzzy_query(text) : [])
 
   let callback_handle = null
   let result_counter = 0
@@ -87,7 +90,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
             output_text.set(out_formatted)
           })
           .catch((err) => printerr(err))
-      }, 300)
+      }, 0)
     }
     else { // prompt text is empty
       result_counter++
@@ -125,6 +128,16 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     }
   }
 
+  function AppEntry({ app }: { app: Apps.Application }): JSX.Element {
+    const children = []
+    children.push(<label label={app.name}></label>)
+    // if(app.description)
+    //   children.push(<label label={`(${app.description})`} />)
+    return <box className="app-entry">
+      {children}
+    </box>
+  }
+
   function PromptBox(): JSX.Element {
     return <box className="prompt-box" spacing={padding}>
       <centerbox className="mode">
@@ -158,7 +171,12 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   function ResultBox(): JSX.Element {
     return <box className="result-box">
       <scrollable hexpand={true} vexpand={true}>
-        <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable></label>
+        <box>
+          <box className="app-list" vertical hexpand={true} spacing={padding} setup={show_when(Mode.App)}>
+            {app_list.as(list => list.map(app => <AppEntry app={app} />))}
+          </box>
+          <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable setup={hide_when(Mode.App)}></label>
+        </box>
       </scrollable>
     </box>
   }
@@ -194,8 +212,6 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
         break
     }
   }
-
-  // ---------- to refactor ----------
 
   return <window
   className="Spotlight"
