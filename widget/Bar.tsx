@@ -20,6 +20,10 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
   const mode = Variable(Mode.App)
   const langs = Variable(["en", "cs"])
   const app_list = input_text(text => mode.get() == Mode.App ? apps.fuzzy_query(text) : [])
+  const app_index = Variable(0)
+  const app_compound = Variable.derive([app_list, app_index], (a, b) => [a, b])
+
+  app_list.subscribe(_ => app_index.set(0)) // reset index each time we update listed apps
 
   let callback_handle = null
   let result_counter = 0
@@ -128,14 +132,34 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
     }
   }
 
-  function AppEntry({ app }: { app: Apps.Application }): JSX.Element {
+  const shift_app_index = delta => {
+    const index = app_index.get()
+    if(delta < 0 && index > 0) {
+      app_index.set(index - 1)
+    }
+    else if(delta > 0 && index < app_list.get().length - 1) {
+      app_index.set(index + 1)
+    }
+    print(app_index.get())
+  }
+
+  function AppEntry({ app, index }: { app: Apps.Application, index: Number }): JSX.Element {
     const children = []
     children.push(<label label={app.name}></label>)
     // if(app.description)
     //   children.push(<label label={`(${app.description})`} />)
-    return <box className="app-entry">
+    let class_name = "app-entry"
+    if(index == app_index.get())
+      class_name += " selected"
+    return <box className={class_name}>
       {children}
     </box>
+  }
+
+  const make_app_entries = () => {
+    return app_compound(([list, _]) =>
+      list.map((app, index) => <AppEntry app={app} index={index} />)
+    )
   }
 
   function PromptBox(): JSX.Element {
@@ -173,7 +197,7 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
       <scrollable hexpand={true} vexpand={true}>
         <box>
           <box className="app-list" vertical hexpand={true} spacing={padding} setup={show_when(Mode.App)}>
-            {app_list.as(list => list.map(app => <AppEntry app={app} />))}
+            {make_app_entries()}
           </box>
           <label className="output" label={output_text()} xalign={0} yalign={0} wrap selectable setup={hide_when(Mode.App)}></label>
         </box>
@@ -205,6 +229,14 @@ export default function Bar(gdkmonitor: Gdk.Monitor) {
           swap_langs()
           enqueue_exec()
         }
+        return true
+        break
+      case Gdk.KEY_Down:
+        shift_app_index(1)
+        return true
+        break
+      case Gdk.KEY_Up:
+        shift_app_index(-1)
         return true
         break
       case Gdk.KEY_Escape:

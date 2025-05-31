@@ -13,6 +13,8 @@ $prompt-height: 50px;
 $padding: 10px;
 $text-padding: calc(1.5 * $padding);
 $radius: 10px;
+$border: 2px;
+$gap: 2px;
 
 window.Spotlight {
   // background: transparent;
@@ -21,14 +23,14 @@ window.Spotlight {
   color: $fg-color;
 
   box.vertical-box {
-    border: 2px solid $border-color;
+    border: $border solid $border-color;
     border-radius: 20px; // nebo $radius?
     padding: $padding;
     background: $bg-color;
     >box {
     }
     box.gap {
-      min-height: 2px;
+      min-height: $gap;
       background-color: $secondary-color;
       margin-top: 10px;
       margin-bottom: 10px;
@@ -55,15 +57,18 @@ window.Spotlight {
   // --- RESULT ---
   box.result-box {
     // padding-top: $padding;
-    // border-top: 2px solid $secondary-color;
+    // border-top: $border solid $secondary-color;
     min-height: 600px;
     box.app-list {
       box.app-entry {
         min-height: $prompt-height;
         background: $secondary-color;
         border-radius: $radius;
-        // padding-left: $padding;
         padding-left: $text-padding;
+        border: $border solid transparent; // workaround for making content not shift
+        &.selected {
+          border-color: $border-color;
+        }
       }
     }
   }
@@ -83,7 +88,7 @@ entry {
 }
 
 entry:focus {
-  // border: 2px solid $border-color;
+  // border: $border solid $border-color;
   border: none;
   box-shadow: none;
 }
