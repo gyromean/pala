@@ -56,8 +56,6 @@ export default function Launcher(gdkmonitor: Gdk.Monitor) {
   }
 
   const finish = () => {
-    // App.quit()
-    // setTimeout(() => App.quit(), 100) // TODO: workaround, remove when we switch to hiding the app and not completely closing it
     App.get_window(window_name).hide()
     reset()
   }
@@ -190,7 +188,6 @@ export default function Launcher(gdkmonitor: Gdk.Monitor) {
 
       <centerbox className="text" setup={show_when(Mode.Translate)}>
         <label label={langs(([lang_from, lang_to]) => {
-          print('zmena')
           return `${lang_from}  ${lang_to}`
         })}></label>
       </centerbox>
@@ -200,9 +197,7 @@ export default function Launcher(gdkmonitor: Gdk.Monitor) {
       hexpand={true}
       text={input_text()}
       onChanged={self => {
-        print('changed')
         input_text.set(self.text)
-        // TODO: dodelat management kdyz je to v Mode.App
         if(mode.get() != Mode.App) {
           enqueue_exec()
         }
