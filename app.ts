@@ -20,13 +20,17 @@ const make_id_to_name = () => {
 const id_to_name = make_id_to_name()
 
 App.start({
+  instanceName: "pala",
   css: style,
+  // first `pala` invocation starts the backend
   main() {
     App.get_monitors().map(Launcher)
   },
+  // consequent `pala` invocations show the launcher
   client(message: (msg: string) => string, ...args: Array<string>) {
     message("show")
   },
+  // calling `ags request show` -i pala` shows the launcher (might be faster then the method above, but is dependent on the `ags` executable)
   requestHandler(request, res) {
     if(request == "show") {
       const hypr_id = hyprland.get_focused_monitor().id;
