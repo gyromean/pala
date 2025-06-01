@@ -19,17 +19,20 @@ const make_id_to_name = () => {
 
 const id_to_name = make_id_to_name()
 
-
 App.start({
   css: style,
   main() {
     App.get_monitors().map(Launcher)
+  },
+  client(message: (msg: string) => string, ...args: Array<string>) {
+    message("show")
   },
   requestHandler(request, res) {
     if(request == "show") {
       const hypr_id = hyprland.get_focused_monitor().id;
       const name = id_to_name[hypr_id]
       App.get_window(name).show()
+      res("ok")
     }
   },
 })
