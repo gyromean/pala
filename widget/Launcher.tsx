@@ -11,10 +11,10 @@ enum Mode {
   Qalc,
 }
 
-export default function Launcher(gdkmonitor: Gdk.Monitor) {
+export default function Launcher(gdkmonitor: Gdk.Monitor, monitor_index: number) {
   const monitor_width = gdkmonitor.get_geometry().width
   const apps = new Apps.Apps()
-  const window_name = "spotlight-" + gdkmonitor.get_geometry().x
+  const window_name = "spotlight-" + monitor_index
 
   const input_text = Variable("")
   const output_text = Variable("")
@@ -159,7 +159,10 @@ export default function Launcher(gdkmonitor: Gdk.Monitor) {
   const launch_app = () => {
     if(mode.get() !== Mode.App)
       return
-    app_list.get()[app_index.get()].launch()
+    const app = app_list.get()[app_index.get()]
+    if(!app)
+      return
+    app.launch()
     finish()
   }
 
